@@ -1,0 +1,38 @@
+INFINITESYNTH - synthé qui génère des sons à l'infini (VST3) pour FL Studio
+
+CE QU'IL FAIT
+- Banque infinie : chaque numéro (#0001, #0002, ... #999999) donne toujours le
+  même son. Boutons < > pour parcourir, "Generer" pour un numéro au hasard.
+- Catégories : Bass, Lead, Pad, Pluck, Keys, ou Tout.
+- Tous les réglages restent modifiables à la main après génération.
+- "Sauver en favori" ajoute le son (réglages inclus) à ta banque perso, stockée
+  dans le dossier AppData\Roaming\MonStudio\InfiniteSynth\favorites.xml
+
+INSTALLATION (Windows)
+1) Installe : Visual Studio 2022 Community (cocher "Développement Desktop en C++"),
+   CMake (cmake.org/download) et Git (git-scm.com).
+2) Ouvre "x64 Native Tools Command Prompt for VS 2022" EN ADMINISTRATEUR,
+   va dans ce dossier, puis :
+     cmake -B build -G "Visual Studio 17 2022"
+     cmake --build build --config Release
+   (le 1er build télécharge JUCE, compte quelques minutes)
+3) Le plugin est copié dans C:\Program Files\Common Files\VST3\InfiniteSynth.vst3
+   Sinon copie-le depuis build\InfiniteSynth_artefacts\Release\VST3\
+4) FL Studio : Options > Manage plugins > Find installed plugins,
+   puis Channel rack > + > InfiniteSynth.
+
+SUR MAC (compilation gratuite sur GitHub, rien à installer)
+1) Crée un compte gratuit sur github.com, puis "New repository" (nom : InfiniteSynth).
+2) Clique sur "uploading an existing file" et glisse TOUT le contenu du dossier
+   (y compris .github et Source). Sur Mac, afficher les fichiers cachés : Cmd+Maj+.
+   Puis "Commit changes".
+3) Onglet "Actions" : la compilation démarre seule (10 à 15 minutes).
+   Si rien ne démarre : "Build VST3" puis "Run workflow".
+4) Quand c'est vert, ouvre l'exécution et télécharge "InfiniteSynth-VST3-mac" en bas (Artifacts).
+5) Dézippe 2 fois (Safari dézippe déjà le premier) pour obtenir InfiniteSynth.vst3.
+6) Ouvre l'app Terminal et tape (en adaptant le chemin si besoin) :
+     xattr -cr ~/Downloads/InfiniteSynth.vst3
+     mkdir -p ~/Library/Audio/Plug-Ins/VST3
+     cp -R ~/Downloads/InfiniteSynth.vst3 ~/Library/Audio/Plug-Ins/VST3/
+   (la 1re commande enlève le blocage de sécurité de macOS sur les fichiers téléchargés)
+7) FL Studio : Options > Manage plugins > Find installed plugins.
