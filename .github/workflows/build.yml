@@ -11,6 +11,34 @@ jobs:
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
       - name: Build
         run: cmake --build build --config Release --parallel
+      - name: Find crash location
+        continue-on-error: true
+        run: |
+          B=$(find build -type f -path "*InfiniteSynth.vst3/Contents/MacOS/InfiniteSynth" | head -n 1)
+          echo "Binary: $B"
+          lipo -info "$B"
+          echo "=== atos ==="
+          atos -o "$B" -arch x86_64 -l 0x0 0x3630B 0x4E88D 0x36F54 0x27792 0x1561D || true
+          echo "=== nm lookup ==="
+          nm -n -arch x86_64 "$B" | c++filt > syms.txt
+          wc -l syms.txt
+          python3 - <<'PY'
+          import re
+          addrs = [0x3630B, 0x4E88D, 0x36F54, 0x27792, 0x1561D]
+          syms = []
+          for line in open('syms.txt'):
+              m = re.match(r'^([0-9a-fA-F]{16})\s+\w\s+(.*)$', line)
+              if m:
+                  syms.append((int(m.group(1), 16), m.group(2).strip()))
+          for a in addrs:
+              best = None
+              for s, n in syms:
+                  if s <= a:
+                      best = (s, n)
+                  else:
+                      break
+              print(hex(a), '->', best[1][:200] if best else 'no symbol')
+          PY
       - name: Sign and zip
         run: |
           P=$(find build -type d -name "InfiniteSynth.vst3" | head -n 1)
@@ -21,13 +49,3 @@ jobs:
         with:
           name: InfiniteSynth-VST3-mac
           path: InfiniteSynth-VST3-mac.zip
-  windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: cmake -B build -G "Visual Studio 17 2022" -A x64
-      - run: cmake --build build --config Release
-      - uses: actions/upload-artifact@v4
-        with:
-          name: InfiniteSynth-VST3-windows
-          path: build/InfiniteSynth_artefacts/Release/VST3/
