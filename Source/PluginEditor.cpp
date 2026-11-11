@@ -3,8 +3,6 @@
 InfiniteEditor::InfiniteEditor (InfiniteProcessor& p)
     : AudioProcessorEditor (&p), proc (p)
 {
-    setSize (780, 560);
-
     title.setFont (juce::Font (juce::FontOptions (32.f, juce::Font::bold)));
     title.setColour (juce::Label::textColourId, juce::Colours::white);
     subtitle.setFont (juce::Font (juce::FontOptions (16.f)));
@@ -67,6 +65,7 @@ InfiniteEditor::InfiniteEditor (InfiniteProcessor& p)
 
     startTimerHz (5);
     timerCallback();
+    setSize (780, 560);   // en dernier : les potards existent déjà
 }
 
 InfiniteEditor::~InfiniteEditor() { stopTimer(); }
@@ -99,6 +98,8 @@ void InfiniteEditor::paint (juce::Graphics& g)
 
 void InfiniteEditor::resized()
 {
+    if (knobs.empty()) return;   // évite une division par zéro
+
     auto r = getLocalBounds().reduced (16);
 
     auto top = r.removeFromTop (76);
